@@ -4,6 +4,7 @@ import { program } from "commander";
 import { createProject } from "./commands/new";
 import { devServer } from "./commands/dev";
 import { buildProject } from "./commands/build";
+import { generateRoute } from "./commands/generate";
 
 const packageJson = require("../../package.json");
 
@@ -30,5 +31,26 @@ program
   .description("Build the project for production")
   .option('-o, --output <dir>', 'Output directory', 'dist')
   .action(buildProject);
+
+program
+  .command("generate <route-name>")
+  .alias("g")
+  .description("Generate a new route handler")
+  .option("-m, --method <method>", "HTTP method (get, post, put, delete)", "get")
+  .option("-p, --path <path>", "Route path", undefined)
+  .option("-d, --dir <directory>", "Output directory", "src/routes")
+  .option(
+    "-t, --template <template>",
+    "Template type (basic, api, crud)",
+    "basic"
+  )
+  .action((routeName: string, options: any) => {
+    generateRoute(routeName, {
+      method: options.method,
+      path: options.path || `/${routeName}`,
+      dir: options.dir,
+      template: options.template,
+    });
+  });
 
 program.parse();
