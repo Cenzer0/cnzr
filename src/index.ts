@@ -16,6 +16,7 @@ export * from "./plugins";
 export { loggerMiddleware, createLoggerMiddleware } from "./middleware/logger";
 export { corsMiddleware, createCorsMiddleware, corsWithOrigins, corsWithCredentials } from "./middleware/cors";
 export { responseTimeMiddleware, createResponseTimeMiddleware, preciseResponseTime, responseTimeWithLogging, createCustomResponseTime, createFormattedResponseTime } from "./middleware/response-time";
+export { rateLimiterMiddleware, createRateLimiterMiddleware } from "./middleware/rate-limiter";
 
 // Dev utilities exports - personal fun stuff dan custom utilities
 export { getRandomJoke, getRandomMotivation, getMorningVibes, getRandomSlang, detectEasterEgg, getRandomBanner } from "./utils/dev-jokes";
