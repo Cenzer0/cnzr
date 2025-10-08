@@ -48,6 +48,26 @@ export type ContextRouteHandler = (
   ctx: import('./context').CenzeroContext
 ) => void | Promise<void>;
 
+// Rate limiter metadata exposed to hooks and responses
+export interface RateLimitInfo {
+  key: string;
+  limit: number;
+  remaining: number;
+  reset: number;
+}
+
+// Configuration for built-in rate limiter middleware
+export interface RateLimiterOptions {
+  windowMs?: number;
+  max?: number;
+  statusCode?: number;
+  message?: string | Record<string, any> | ((ctx: import('./context').CenzeroContext, info: RateLimitInfo) => any);
+  headers?: boolean;
+  keyGenerator?: (ctx: import('./context').CenzeroContext) => string | null | undefined;
+  skip?: (ctx: import('./context').CenzeroContext) => boolean;
+  onLimitReached?: (ctx: import('./context').CenzeroContext, info: RateLimitInfo) => void;
+}
+
 // Route definition structure
 // Ini yang dipake internal buat nyimpen route info
 export interface Route {
@@ -82,5 +102,6 @@ export interface CenzeroOptions {
   useFileRouting?: boolean; // File-based routing like Next.js
   routesDir?: string; // Directory buat file routing
   debug?: boolean; // Debug mode dengan extra logging
+  rateLimiter?: RateLimiterOptions; // Optional global rate limiter configuration
   // TODO: bisa tambahin cors options, rate limiting, dll
 }
