@@ -70,6 +70,11 @@ export interface CenzeroContext {
   throw(status: number, message?: string): never;
   assert(condition: any, status: number, message?: string): asserts condition;
   createError(status: number, message?: string): Error;
+
+  // Convenience getters exposed by the implementation
+  readonly isAjax: boolean;
+  readonly userAgent: string;
+  readonly clientIP: string;
 }
 
 export class Context implements CenzeroContext {
