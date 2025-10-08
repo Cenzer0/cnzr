@@ -5,7 +5,7 @@ export { CenzeroApp } from "./core/server";
 export { Router } from "./core/router";
 export { FileRouter } from "./core/file-router";
 export { ErrorHandlerManager, createError, badRequest, unauthorized, forbidden, notFound, methodNotAllowed, conflict, validationError, internalServerError, serviceUnavailable } from "./core/error-handler";
-export { CenzeroContext } from "./core/context";
+export { CenzeroContext, ContextSnapshot } from "./core/context";
 export { Logger } from "./core/logger";
 export { CorsOptions, cors } from "./core/cors";
 export { PluginManager } from "./core/plugin";
