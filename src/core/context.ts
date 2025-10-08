@@ -3,6 +3,25 @@ import { CenzeroRequest, CenzeroResponse } from './types';
 import { Session, SessionOptions } from './session';
 import { Cookies } from './cookies';
 
+/**
+ * Immutable snapshot of context state at a specific point in time
+ * Useful for logging, debugging, and state preservation
+ */
+export interface ContextSnapshot {
+  requestId: string;
+  method: string;
+  path: string;
+  url: string;
+  params: Record<string, string>;
+  query: Record<string, any>;
+  body: any;
+  headers: Record<string, string | string[]>;
+  state: Record<string, any>;
+  timestamp: number;
+  clientIP: string;
+  userAgent: string;
+}
+
 // Custom context utilities - karena gw suka yang practical
 const ContextUtils = {
   // Request ID generator - simple tapi berguna buat tracing
@@ -27,6 +46,35 @@ const ContextUtils = {
       "Context pattern bikin code lebih clean daripada req/res terpisah"
     ];
     return tips[Math.floor(Math.random() * tips.length)];
+  },
+
+  // Deep clone utility for snapshot - recursive object copying
+  deepClone: <T>(obj: T): T => {
+    if (obj === null || typeof obj !== 'object') {
+      return obj;
+    }
+
+    if (obj instanceof Date) {
+      return new Date(obj.getTime()) as any;
+    }
+
+    if (obj instanceof Array) {
+      const clonedArr: any[] = [];
+      obj.forEach((item) => {
+        clonedArr.push(ContextUtils.deepClone(item));
+      });
+      return clonedArr as any;
+    }
+
+    if (obj instanceof Object) {
+      const clonedObj: any = {};
+      Object.keys(obj).forEach((key) => {
+        clonedObj[key] = ContextUtils.deepClone((obj as any)[key]);
+      });
+      return clonedObj;
+    }
+
+    return obj;
   }
 };
 
@@ -75,6 +123,10 @@ export interface CenzeroContext {
   readonly isAjax: boolean;
   readonly userAgent: string;
   readonly clientIP: string;
+
+  // Snapshot utilities - capture immutable state at a point in time
+  snapshot(): ContextSnapshot;
+  snapshot(keys: string[]): Partial<ContextSnapshot>;
 }
 
 export class Context implements CenzeroContext {
@@ -205,5 +257,53 @@ export class Context implements CenzeroContext {
       return forwarded.split(',')[0].trim();
     }
     return this.get('x-real-ip') || this.req.connection?.remoteAddress || 'unknown';
+  }
+
+  /**
+   * Create an immutable snapshot of the current context state
+   * Useful for logging, debugging, or preserving state at a specific point
+   * 
+   * @param keys - Optional array of specific keys to include in snapshot
+   * @returns Frozen snapshot object
+   * 
+   * @example
+   * ```typescript
+   * // Full snapshot
+   * const snapshot = ctx.snapshot();
+   * 
+   * // Partial snapshot
+   * const partial = ctx.snapshot(['method', 'path', 'state']);
+   * ```
+   */
+  snapshot(): ContextSnapshot;
+  snapshot(keys: string[]): Partial<ContextSnapshot>;
+  snapshot(keys?: string[]): ContextSnapshot | Partial<ContextSnapshot> {
+    const fullSnapshot: ContextSnapshot = {
+      requestId: this.requestId,
+      method: this.method,
+      path: this.path,
+      url: this.url,
+      params: ContextUtils.deepClone(this.params),
+      query: ContextUtils.deepClone(this.query),
+      body: ContextUtils.deepClone(this.body),
+      headers: ContextUtils.deepClone(this.headers),
+      state: ContextUtils.deepClone(this.state),
+      timestamp: Date.now(),
+      clientIP: this.clientIP,
+      userAgent: this.userAgent,
+    };
+
+    if (!keys) {
+      return Object.freeze(fullSnapshot);
+    }
+
+    const partial: any = {};
+    keys.forEach((key) => {
+      if (key in fullSnapshot) {
+        partial[key] = (fullSnapshot as any)[key];
+      }
+    });
+
+    return Object.freeze(partial);
   }
 }
