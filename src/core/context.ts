@@ -146,7 +146,6 @@ export class Context implements CenzeroContext {
   requestId: string; // Add the missing property
   state: Record<string, any> = {}; // NOTE: super useful buat middleware communication
   private lastSnapshotTimestamp = 0;
-  private snapshotSequence = 0;
 
   constructor(req: CenzeroRequest, res: CenzeroResponse, sessionOptions?: SessionOptions) {
     this.req = req;
@@ -315,11 +314,8 @@ export class Context implements CenzeroContext {
     const now = Date.now();
 
     if (now <= this.lastSnapshotTimestamp) {
-      this.snapshotSequence += 1;
-      const next = now + this.snapshotSequence * SNAPSHOT_INCREMENT_MS; // microstep in ms
-      this.lastSnapshotTimestamp = Math.max(this.lastSnapshotTimestamp + SNAPSHOT_INCREMENT_MS, next);
+      this.lastSnapshotTimestamp += SNAPSHOT_INCREMENT_MS;
     } else {
-      this.snapshotSequence = 0;
       this.lastSnapshotTimestamp = now;
     }
 

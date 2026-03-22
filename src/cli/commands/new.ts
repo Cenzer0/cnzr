@@ -187,7 +187,6 @@ app.listen(port, 'localhost', () => {
     console.log("  npm run dev");
   } catch (error) {
     spinner.fail("Error creating project");
-    console.error("❌ Error creating project:", error);
     process.exit(1);
   } finally {
     spinner.stop();
