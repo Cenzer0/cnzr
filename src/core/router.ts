@@ -6,6 +6,8 @@ import { Route, RouteHandler, ContextRouteHandler, MiddlewareFunction, ContextMi
 export class Router {
   private routeList: Route[] = []; // keep track of all registered routes
   private routePrefix: string;
+  private methodBuckets: Map<string, Route[]> = new Map();
+  private wildcardRoutes: Route[] = [];
 
   constructor(prefix: string = '') {
     this.routePrefix = prefix;
@@ -46,13 +48,25 @@ export class Router {
     const middlewareList = handlerStack.slice(0, -1) as (MiddlewareFunction | ContextMiddlewareFunction)[];
     const finalHandler = handlerStack[handlerStack.length - 1] as (RouteHandler | ContextRouteHandler);
 
-    this.routeList.push({
+    const compiled = this.compilePath(fullPath);
+    const route: Route = {
       method: httpMethod,
       path: fullPath,
       handler: finalHandler,
       middlewares: middlewareList,
-      useContext: this.isContextHandler(finalHandler) || middlewareList.some(m => this.isContextMiddleware(m))
-    });
+      useContext: this.isContextHandler(finalHandler) || middlewareList.some(m => this.isContextMiddleware(m)),
+      compiled
+    };
+
+    this.routeList.push(route);
+
+    if (httpMethod === "*") {
+      this.wildcardRoutes.push(route);
+    } else {
+      const bucket = this.methodBuckets.get(httpMethod) || [];
+      bucket.push(route);
+      this.methodBuckets.set(httpMethod, bucket);
+    }
   }
 
   // Helper to check if handler expects context object (newer style)
@@ -69,18 +83,28 @@ export class Router {
     return this.routeList;
   }
 
-  // TODO: Maybe add some caching here for performance if we get lots of routes
   matchRoute(httpMethod: string, requestPath: string): { route: Route; params: Record<string, string> } | null {
+    const matchesMethod = (route: Route) =>
+      route.method === "*" || route.method === httpMethod;
+
+    const candidates: Route[] = [
+      ...(this.methodBuckets.get(httpMethod) || []),
+      ...this.wildcardRoutes
+    ];
+
+    for (const registeredRoute of candidates) {
+      if (!matchesMethod(registeredRoute)) continue;
+      const extractedParams = this.matchPath(registeredRoute, requestPath);
+      if (extractedParams !== null) {
+        return { route: registeredRoute, params: extractedParams };
+      }
+    }
+
+    // Fallback to full scan if not found (covers any edge cases)
     for (const registeredRoute of this.routeList) {
-      if (registeredRoute.method !== "*" && registeredRoute.method !== httpMethod) {
-        continue;
-      }
-
-      if (registeredRoute.path === "*") {
-        return { route: registeredRoute, params: {} };
-      }
-
-      const extractedParams = this.matchPath(registeredRoute.path, requestPath);
+      if (!matchesMethod(registeredRoute)) continue;
+      if (candidates.includes(registeredRoute)) continue;
+      const extractedParams = this.matchPath(registeredRoute, requestPath);
       if (extractedParams !== null) {
         return { route: registeredRoute, params: extractedParams };
       }
@@ -89,9 +113,20 @@ export class Router {
     return null; // no matching route found
   }
 
+  private compilePath(routePattern: string): { segments: string[] } {
+    return {
+      segments: routePattern.split("/").filter(Boolean)
+    };
+  }
+
   // Path matching logic - handles dynamic params like :id
-  private matchPath(routePattern: string, actualPath: string): Record<string, string> | null {
-    const routeParts = routePattern.split("/").filter(s => s);
+  private matchPath(route: Route, actualPath: string): Record<string, string> | null {
+    if (route.path === "*") {
+      return {};
+    }
+
+    const compiled = route.compiled || this.compilePath(route.path);
+    const routeParts = compiled.segments;
     const pathParts = actualPath.split("/").filter(s => s);
 
     if (routeParts.length !== pathParts.length) {

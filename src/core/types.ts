@@ -76,6 +76,9 @@ export interface Route {
   handler: RouteHandler | ContextRouteHandler;
   middlewares: (MiddlewareFunction | ContextMiddlewareFunction)[]; // Per-route middlewares
   useContext?: boolean; // Flag buat nentuin style mana yang dipake
+  compiled?: {
+    segments: string[];
+  };
 }
 
 export interface RouterOptions {

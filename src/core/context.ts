@@ -143,6 +143,7 @@ export class Context implements CenzeroContext {
   cookies: Cookies;
   requestId: string; // Add the missing property
   state: Record<string, any> = {}; // NOTE: super useful buat middleware communication
+  private lastSnapshotTimestamp = 0;
 
   constructor(req: CenzeroRequest, res: CenzeroResponse, sessionOptions?: SessionOptions) {
     this.req = req;
@@ -288,7 +289,7 @@ export class Context implements CenzeroContext {
       body: ContextUtils.deepClone(this.body),
       headers: ContextUtils.deepClone(this.headers),
       state: ContextUtils.deepClone(this.state),
-      timestamp: Date.now(),
+      timestamp: this.nextSnapshotTimestamp(),
       clientIP: this.clientIP,
       userAgent: this.userAgent,
     };
@@ -305,5 +306,15 @@ export class Context implements CenzeroContext {
     });
 
     return Object.freeze(partial);
+  }
+
+  private nextSnapshotTimestamp(): number {
+    const now = Date.now();
+    if (now <= this.lastSnapshotTimestamp) {
+      this.lastSnapshotTimestamp += 1;
+      return this.lastSnapshotTimestamp;
+    }
+    this.lastSnapshotTimestamp = now;
+    return now;
   }
 }

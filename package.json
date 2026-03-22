@@ -1,6 +1,6 @@
 {
   "name": "cnzr",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Cenzero - A minimalist but powerful Node.js web framework",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -54,8 +54,7 @@
   "scripts": {
     "build": "npm run clean && npm run build:cjs && npm run build:esm",
     "build:cjs": "tsc -p tsconfig.cjs.json",
-    "build:esm": "tsc -p tsconfig.esm.json && npm run fix-esm",
-    "fix-esm": "node scripts/fix-esm.js",
+    "build:esm": "tsc -p tsconfig.esm.json",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "start": "node dist/cjs/index.js",
     "test": "jest",
@@ -85,6 +84,31 @@
   "dependencies": {
     "commander": "^13.1.0",
     "ejs": "^3.1.9"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": [
+      "<rootDir>/test/setup.ts"
+    ],
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "json"
+    ],
+    "testMatch": [
+      "**/test/**/*.test.ts",
+      "**/test/**/*.test.js"
+    ],
+    "transform": {
+      "^.+\\.(t|j)sx?$": [
+        "ts-jest",
+        {
+          "tsconfig": "tsconfig.test.json"
+        }
+      ]
+    }
   },
   "files": [
     "dist/**/*",

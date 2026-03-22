@@ -1,5 +1,5 @@
 import { mkdir, writeFile, access } from "fs/promises";
-import { join, dirname } from "path";
+import { join, dirname, isAbsolute } from "path";
 import { constants } from "fs";
 
 interface RouteOptions {
@@ -206,7 +206,7 @@ export async function generateRoute(
   console.log(`🔧 Generating ${template} route: ${routeName}`);
 
   try {
-    const routesDir = join(process.cwd(), dir);
+    const routesDir = isAbsolute(dir) ? dir : join(process.cwd(), dir);
     const fileName = `${routeName}.ts`;
     const filePath = join(routesDir, fileName);
 
@@ -239,13 +239,15 @@ export async function generateRoute(
     console.log("");
     console.log("Usage example:");
 
+    const importBase = isAbsolute(dir) ? dir.replace(process.cwd(), ".") : dir;
+
     if (template === "crud") {
       const entityName = routeName.replace(/Handler$/, "");
       const capitalizedEntity =
         entityName.charAt(0).toUpperCase() + entityName.slice(1);
 
       console.log(`
-import { list${capitalizedEntity}s, get${capitalizedEntity}, create${capitalizedEntity}, update${capitalizedEntity}, delete${capitalizedEntity} } from './${dir}/${routeName}';
+ import { list${capitalizedEntity}s, get${capitalizedEntity}, create${capitalizedEntity}, update${capitalizedEntity}, delete${capitalizedEntity} } from '${importBase}/${routeName}';
 
 app.get('${path}', list${capitalizedEntity}s);
 app.get('${path}/:id', get${capitalizedEntity});
@@ -255,7 +257,7 @@ app.delete('${path}/:id', delete${capitalizedEntity});
       `);
     } else {
       console.log(`
-import { ${routeName}Handler } from './${dir}/${routeName}';
+ import { ${routeName}Handler } from '${importBase}/${routeName}';
 
 app.${method}('${path}', ${routeName}Handler);
       `);
