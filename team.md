@@ -1,4 +1,0 @@
-skynet
-cenzero
-ricky
-abzan
