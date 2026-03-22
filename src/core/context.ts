@@ -314,7 +314,8 @@ export class Context implements CenzeroContext {
 
     if (now <= this.lastSnapshotTimestamp) {
       this.snapshotSequence += 1;
-      this.lastSnapshotTimestamp += Math.max(this.snapshotSequence, 0.000001);
+      const next = now + this.snapshotSequence * 0.001; // microstep in ms
+      this.lastSnapshotTimestamp = Math.max(this.lastSnapshotTimestamp + 0.001, next);
     } else {
       this.snapshotSequence = 0;
       this.lastSnapshotTimestamp = now;

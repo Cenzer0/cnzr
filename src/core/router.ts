@@ -101,7 +101,6 @@ export class Router {
     this.wildcardRoutes.forEach(addCandidate);
 
     for (const registeredRoute of candidates) {
-      if (!matchesMethod(registeredRoute)) continue;
       const extractedParams = this.matchPath(registeredRoute, requestPath);
       if (extractedParams !== null) {
         return { route: registeredRoute, params: extractedParams };
