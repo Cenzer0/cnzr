@@ -91,6 +91,7 @@ export class Router {
       ...(this.methodBuckets.get(httpMethod) || []),
       ...this.wildcardRoutes
     ];
+    const seen = new Set<Route>(candidates);
 
     for (const registeredRoute of candidates) {
       if (!matchesMethod(registeredRoute)) continue;
@@ -102,8 +103,8 @@ export class Router {
 
     // Fallback to full scan if not found (covers any edge cases)
     for (const registeredRoute of this.routeList) {
+      if (seen.has(registeredRoute)) continue;
       if (!matchesMethod(registeredRoute)) continue;
-      if (candidates.includes(registeredRoute)) continue;
       const extractedParams = this.matchPath(registeredRoute, requestPath);
       if (extractedParams !== null) {
         return { route: registeredRoute, params: extractedParams };

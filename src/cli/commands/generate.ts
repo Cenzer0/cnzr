@@ -1,5 +1,5 @@
 import { mkdir, writeFile, access } from "fs/promises";
-import { join, dirname, isAbsolute } from "path";
+import { join, dirname, isAbsolute, relative } from "path";
 import { constants } from "fs";
 
 interface RouteOptions {
@@ -239,7 +239,10 @@ export async function generateRoute(
     console.log("");
     console.log("Usage example:");
 
-    const importBase = isAbsolute(dir) ? dir.replace(process.cwd(), ".") : dir;
+    const relativeBase = isAbsolute(dir) ? relative(process.cwd(), dir) : dir;
+    const importBase = relativeBase.startsWith(".")
+      ? relativeBase
+      : `./${relativeBase}`;
 
     if (template === "crud") {
       const entityName = routeName.replace(/Handler$/, "");
