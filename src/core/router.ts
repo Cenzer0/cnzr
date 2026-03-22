@@ -87,11 +87,18 @@ export class Router {
     const matchesMethod = (route: Route) =>
       route.method === "*" || route.method === httpMethod;
 
-    const candidates: Route[] = [
-      ...(this.methodBuckets.get(httpMethod) || []),
-      ...this.wildcardRoutes
-    ];
-    const seen = new Set<Route>(candidates);
+    const candidates: Route[] = [];
+    const seen = new Set<Route>();
+
+    const addCandidate = (route: Route) => {
+      if (!seen.has(route)) {
+        seen.add(route);
+        candidates.push(route);
+      }
+    };
+
+    (this.methodBuckets.get(httpMethod) || []).forEach(addCandidate);
+    this.wildcardRoutes.forEach(addCandidate);
 
     for (const registeredRoute of candidates) {
       if (!matchesMethod(registeredRoute)) continue;

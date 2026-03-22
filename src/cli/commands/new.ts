@@ -40,6 +40,7 @@ export async function createProject(projectName: string, options: any) {
   spinner.update("Scaffolding directories");
 
   const projectPath = join(process.cwd(), projectName);
+  const description = options?.description || "";
 
   try {
     // Create project directory structure
@@ -53,7 +54,7 @@ export async function createProject(projectName: string, options: any) {
     const packageJson = {
       name: projectName,
       version: "1.0.0",
-      description: "",
+      description,
       main: "src/index.ts",
       scripts: {
         start: "node dist/index.js",

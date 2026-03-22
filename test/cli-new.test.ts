@@ -21,4 +21,13 @@ describe("CLI new command", () => {
     const indexRaw = await readFile(join(projectPath, "src", "index.ts"), "utf-8");
     expect(indexRaw).toContain("from 'cnzr'");
   });
+
+  test("accepts custom metadata options", async () => {
+    await createProject(projectName, { description: "Demo app" });
+
+    const pkgRaw = await readFile(join(projectPath, "package.json"), "utf-8");
+    const pkg = JSON.parse(pkgRaw);
+
+    expect(pkg.description).toBe("Demo app");
+  });
 });
