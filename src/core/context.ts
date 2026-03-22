@@ -78,6 +78,8 @@ const ContextUtils = {
   }
 };
 
+const SNAPSHOT_INCREMENT_MS = 0.001;
+
 // Main context interface - ini yang bakal dipake developer
 // Design philosophy: everything you need in one place
 export interface CenzeroContext {
@@ -314,8 +316,8 @@ export class Context implements CenzeroContext {
 
     if (now <= this.lastSnapshotTimestamp) {
       this.snapshotSequence += 1;
-      const next = now + this.snapshotSequence * 0.001; // microstep in ms
-      this.lastSnapshotTimestamp = Math.max(this.lastSnapshotTimestamp + 0.001, next);
+      const next = now + this.snapshotSequence * SNAPSHOT_INCREMENT_MS; // microstep in ms
+      this.lastSnapshotTimestamp = Math.max(this.lastSnapshotTimestamp + SNAPSHOT_INCREMENT_MS, next);
     } else {
       this.snapshotSequence = 0;
       this.lastSnapshotTimestamp = now;

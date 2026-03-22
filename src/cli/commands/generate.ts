@@ -250,7 +250,7 @@ export async function generateRoute(
         entityName.charAt(0).toUpperCase() + entityName.slice(1);
 
       console.log(`
- import { list${capitalizedEntity}s, get${capitalizedEntity}, create${capitalizedEntity}, update${capitalizedEntity}, delete${capitalizedEntity} } from '${importBase}/${routeName}';
+import { list${capitalizedEntity}s, get${capitalizedEntity}, create${capitalizedEntity}, update${capitalizedEntity}, delete${capitalizedEntity} } from '${importBase}/${routeName}';
 
 app.get('${path}', list${capitalizedEntity}s);
 app.get('${path}/:id', get${capitalizedEntity});
@@ -260,7 +260,7 @@ app.delete('${path}/:id', delete${capitalizedEntity});
       `);
     } else {
       console.log(`
- import { ${routeName}Handler } from '${importBase}/${routeName}';
+import { ${routeName}Handler } from '${importBase}/${routeName}';
 
 app.${method}('${path}', ${routeName}Handler);
       `);

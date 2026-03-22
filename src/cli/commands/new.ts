@@ -16,7 +16,8 @@ function createSpinner(label: string) {
   let frame = 0;
   let text = label;
   const interval = setInterval(() => {
-    process.stdout.write(`\r${frames[frame = (frame + 1) % frames.length]} ${text}`);
+    frame = (frame + 1) % frames.length;
+    process.stdout.write(`\r${frames[frame]} ${text}`);
   }, 80);
 
   return {
