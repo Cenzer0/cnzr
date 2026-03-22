@@ -78,7 +78,7 @@ const ContextUtils = {
   }
 };
 
-const SNAPSHOT_INCREMENT_MS = 0.001;
+const SNAPSHOT_INCREMENT_MS = 0.001; // 1 microsecond in milliseconds for monotonic snapshots
 
 // Main context interface - ini yang bakal dipake developer
 // Design philosophy: everything you need in one place

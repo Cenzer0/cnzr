@@ -1,4 +1,4 @@
-import { readFile, rm } from "fs/promises";
+import { readFile, rm, access } from "fs/promises";
 import { join } from "path";
 import { createProject } from "../src/cli/commands/new";
 
@@ -20,6 +20,12 @@ describe("CLI new command", () => {
 
     const indexRaw = await readFile(join(projectPath, "src", "index.ts"), "utf-8");
     expect(indexRaw).toContain("from 'cnzr'");
+
+    // Verify scaffolded structure
+    expect(await exists(join(projectPath, "src"))).toBe(true);
+    expect(await exists(join(projectPath, "public", "index.html"))).toBe(true);
+    expect(await exists(join(projectPath, "views"))).toBe(true);
+    expect(await exists(join(projectPath, "tsconfig.json"))).toBe(true);
   });
 
   test("accepts custom metadata options", async () => {
@@ -31,3 +37,12 @@ describe("CLI new command", () => {
     expect(pkg.description).toBe("Demo app");
   });
 });
+
+async function exists(path: string): Promise<boolean> {
+  try {
+    await access(path);
+    return true;
+  } catch {
+    return false;
+  }
+}

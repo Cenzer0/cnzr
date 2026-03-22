@@ -180,7 +180,7 @@ app.listen(port, 'localhost', () => {
 
     await writeFile(join(projectPath, "public", "index.html"), indexHtml);
 
-    spinner.success(`Project ${projectName} created with animated setup ✨`);
+    spinner.success(`Project ${projectName} created successfully ✨`);
     console.log("\nNext steps:");
     console.log(`  cd ${projectName}`);
     console.log("  npm install");
